@@ -6,18 +6,21 @@ import fs from "fs";
 import path from "path";
 import { marked } from "marked";
 
+// Import routes
 import taskRoutes from "./routes/tasks.js";
 import authRoutes from "./routes/auth.js";
 import { authenticateToken } from "./middleware/auth.js";
 
+// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// ✅ API documentation page
+// ✅ API DOCUMENTATION ROUTE (renders API_DOC.md)
 app.get("/docs", (req, res) => {
   const filePath = path.resolve(process.cwd(), "API_DOC.md");
 
@@ -45,9 +48,11 @@ app.get("/docs", (req, res) => {
   `);
 });
 
+// Mount API routes
 app.use("/api/auth", authRoutes);
 app.use("/api", taskRoutes);
 
+// Protected route example
 app.get("/api/protected", authenticateToken, (req, res) => {
   res.json({
     success: true,
@@ -56,6 +61,7 @@ app.get("/api/protected", authenticateToken, (req, res) => {
   });
 });
 
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -64,8 +70,17 @@ app.use((err, req, res, next) => {
     error: process.env.NODE_ENV === "development" ? err.message : {},
   });
 });
+//Home page route
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Task Management API is running",
+    docs: "/docs",
+  });
+});
 
-// 404 handler (must be last)
+
+// 404 handler (MUST be last)
 app.use("*", (req, res) => {
   res.status(404).json({
     success: false,
@@ -73,8 +88,10 @@ app.use("*", (req, res) => {
   });
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
 
 export default app;
+
